@@ -19,6 +19,12 @@
             border-radius: 50%;
             position: absolute;
         }
+        .line {
+            position: absolute;
+            height: 2px;
+            background-color: blue;
+            transform-origin: top left;
+        }
         #controls {
             margin-top: 10px;
         }
@@ -28,6 +34,7 @@
     <div id="map"></div>
     <div id="controls">
         <button id="startBtn">Iniciar</button>
+        <button id="stopBtn" disabled>Detener</button>
         <p>Tiempo: <span id="timer">0</span> segundos</p>
         <p>Distancia: <span id="distance">0</span> metros</p>
     </div>
