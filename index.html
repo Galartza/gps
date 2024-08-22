@@ -3,15 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Geolocalización con Ruta y Cronómetro</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <title>Geolocalización y Ruta</title>
     <style>
-        #map {
-            height: 400px;
-            width: 100%;
-            position: relative;
-        }
+        #map { height: 80vh; }
         #controls {
-            margin-top: 10px;
+            padding: 10px;
+            background: white;
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 1000;
         }
     </style>
 </head>
@@ -23,7 +26,6 @@
         <p>Tiempo: <span id="timer">0</span> segundos</p>
         <p>Distancia: <span id="distance">0</span> metros</p>
     </div>
-    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY"></script>
     <script src="app.js"></script>
 </body>
 </html>

@@ -1,87 +1,80 @@
+const map = L.map('map').setView([0, 0], 13);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+}).addTo(map);
+
 let positions = [];
+let interval;
 let timer = 0;
 let distance = 0;
-let interval;
 let lastPosition = null;
-let map;
-let polyline;
 
 const timerElement = document.getElementById('timer');
 const distanceElement = document.getElementById('distance');
 const startBtn = document.getElementById('startBtn');
 const stopBtn = document.getElementById('stopBtn');
 
-function initMap() {
-    map = new google.maps.Map(document.getElementById('map'), {
-        center: { lat: 0, lng: 0 },
-        zoom: 15,
-    });
-
-    polyline = new google.maps.Polyline({
-        path: [],
-        geodesic: true,
-        strokeColor: '#0000FF',
-        strokeOpacity: 1.0,
-        strokeWeight: 2
-    });
-    polyline.setMap(map);
-}
-
 function calculateDistance(lat1, lon1, lat2, lon2) {
     const R = 6371e3; // Radio de la Tierra en metros
-    const φ1 = lat1 * Math.PI/180;
-    const φ2 = lat2 * Math.PI/180;
-    const Δφ = (lat2 - lat1) * Math.PI/180;
-    const Δλ = (lon2 - lon1) * Math.PI/180;
+    const φ1 = lat1 * Math.PI / 180;
+    const φ2 = lat2 * Math.PI / 180;
+    const Δφ = (lat2 - lat1) * Math.PI / 180;
+    const Δλ = (lon2 - lon1) * Math.PI / 180;
 
-    const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+    const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
               Math.cos(φ1) * Math.cos(φ2) *
-              Math.sin(Δλ/2) * Math.sin(Δλ/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+              Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
     return R * c; // En metros
 }
 
-startBtn.addEventListener('click', () => {
+function startTracking() {
     startBtn.disabled = true;
     stopBtn.disabled = false;
+    positions = [];
+    distance = 0;
+    timer = 0;
+    lastPosition = null;
+    timerElement.textContent = timer;
+    distanceElement.textContent = distance;
 
     interval = setInterval(() => {
         timer++;
         timerElement.textContent = timer;
+    }, 1000);
 
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition((position) => {
-                const { latitude, longitude } = position.coords;
-                const latLng = new google.maps.LatLng(latitude, longitude);
-                map.setCenter(latLng);
+    navigator.geolocation.watchPosition((position) => {
+        const { latitude, longitude } = position.coords;
+        const latLng = [latitude, longitude];
+        positions.push(latLng);
 
-                if (lastPosition) {
-                    const dist = calculateDistance(lastPosition.lat, lastPosition.lng, latitude, longitude);
-                    distance += dist;
-                    distanceElement.textContent = Math.round(distance);
+        if (positions.length > 1) {
+            const polyline = L.polyline(positions, { color: 'blue' }).addTo(map);
 
-                    const path = polyline.getPath();
-                    path.push(latLng);
-                    polyline.setPath(path);
-                }
+            if (lastPosition) {
+                const dist = calculateDistance(lastPosition.lat, lastPosition.lng, latitude, longitude);
+                distance += dist;
+                distanceElement.textContent = Math.round(distance);
+            }
 
-                lastPosition = { lat: latitude, lng: longitude };
-            }, (error) => {
-                console.error('Error obteniendo la ubicación: ', error);
-            });
-        } else {
-            alert('Geolocalización no soportada por este navegador.');
+            map.setView(latLng);
         }
-    }, 3000);
-});
 
-stopBtn.addEventListener('click', () => {
-    clearInterval(interval);
+        lastPosition = { lat: latitude, lng: longitude };
+    }, (error) => console.error(error), {
+        enableHighAccuracy: true,
+        maximumAge: 0,
+        timeout: 5000,
+    });
+}
+
+function stopTracking() {
     startBtn.disabled = false;
     stopBtn.disabled = true;
+    clearInterval(interval);
+}
 
-    alert(`Recorrido finalizado. Tiempo: ${timer} segundos, Distancia: ${Math.round(distance)} metros.`);
-});
-
-window.onload = initMap;
+startBtn.addEventListener('click', startTracking);
+stopBtn.addEventListener('click', stopTracking);
