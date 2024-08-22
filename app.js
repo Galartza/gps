@@ -3,12 +3,29 @@ let timer = 0;
 let distance = 0;
 let interval;
 let lastPosition = null;
+let map;
+let polyline;
 
-const mapElement = document.getElementById('map');
 const timerElement = document.getElementById('timer');
 const distanceElement = document.getElementById('distance');
 const startBtn = document.getElementById('startBtn');
 const stopBtn = document.getElementById('stopBtn');
+
+function initMap() {
+    map = new google.maps.Map(document.getElementById('map'), {
+        center: { lat: 0, lng: 0 },
+        zoom: 15,
+    });
+
+    polyline = new google.maps.Polyline({
+        path: [],
+        geodesic: true,
+        strokeColor: '#0000FF',
+        strokeOpacity: 1.0,
+        strokeWeight: 2
+    });
+    polyline.setMap(map);
+}
 
 function calculateDistance(lat1, lon1, lat2, lon2) {
     const R = 6371e3; // Radio de la Tierra en metros
@@ -25,24 +42,6 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
     return R * c; // En metros
 }
 
-function drawLine(lat1, lon1, lat2, lon2) {
-    const deltaX = lon2 - lon1;
-    const deltaY = lat2 - lat1;
-
-    const angle = Math.atan2(deltaY, deltaX) * 180 / Math.PI;
-
-    const length = calculateDistance(lat1, lon1, lat2, lon2);
-
-    const line = document.createElement('div');
-    line.className = 'line';
-    line.style.width = `${length}px`;
-    line.style.transform = `rotate(${angle}deg)`;
-    line.style.top = `${lat1 * 400}px`;
-    line.style.left = `${lon1 * 600}px`;
-
-    mapElement.appendChild(line);
-}
-
 startBtn.addEventListener('click', () => {
     startBtn.disabled = true;
     stopBtn.disabled = false;
@@ -53,16 +52,20 @@ startBtn.addEventListener('click', () => {
 
         navigator.geolocation.getCurrentPosition((position) => {
             const { latitude, longitude } = position.coords;
+            const latLng = new google.maps.LatLng(latitude, longitude);
+            map.setCenter(latLng);
 
             if (lastPosition) {
-                const dist = calculateDistance(lastPosition.latitude, lastPosition.longitude, latitude, longitude);
+                const dist = calculateDistance(lastPosition.lat, lastPosition.lng, latitude, longitude);
                 distance += dist;
                 distanceElement.textContent = Math.round(distance);
 
-                drawLine(lastPosition.latitude, lastPosition.longitude, latitude, longitude);
+                const path = polyline.getPath();
+                path.push(latLng);
+                polyline.setPath(path);
             }
 
-            lastPosition = { latitude, longitude };
+            lastPosition = { lat: latitude, lng: longitude };
         });
     }, 3000);
 });
@@ -74,3 +77,5 @@ stopBtn.addEventListener('click', () => {
 
     alert(`Recorrido finalizado. Tiempo: ${timer} segundos, Distancia: ${Math.round(distance)} metros.`);
 });
+
+window.onload = initMap;
