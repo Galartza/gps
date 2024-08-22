@@ -50,23 +50,29 @@ startBtn.addEventListener('click', () => {
         timer++;
         timerElement.textContent = timer;
 
-        navigator.geolocation.getCurrentPosition((position) => {
-            const { latitude, longitude } = position.coords;
-            const latLng = new google.maps.LatLng(latitude, longitude);
-            map.setCenter(latLng);
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition((position) => {
+                const { latitude, longitude } = position.coords;
+                const latLng = new google.maps.LatLng(latitude, longitude);
+                map.setCenter(latLng);
 
-            if (lastPosition) {
-                const dist = calculateDistance(lastPosition.lat, lastPosition.lng, latitude, longitude);
-                distance += dist;
-                distanceElement.textContent = Math.round(distance);
+                if (lastPosition) {
+                    const dist = calculateDistance(lastPosition.lat, lastPosition.lng, latitude, longitude);
+                    distance += dist;
+                    distanceElement.textContent = Math.round(distance);
 
-                const path = polyline.getPath();
-                path.push(latLng);
-                polyline.setPath(path);
-            }
+                    const path = polyline.getPath();
+                    path.push(latLng);
+                    polyline.setPath(path);
+                }
 
-            lastPosition = { lat: latitude, lng: longitude };
-        });
+                lastPosition = { lat: latitude, lng: longitude };
+            }, (error) => {
+                console.error('Error obteniendo la ubicación: ', error);
+            });
+        } else {
+            alert('Geolocalización no soportada por este navegador.');
+        }
     }, 3000);
 });
 
