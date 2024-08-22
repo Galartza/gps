@@ -3,16 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Geolocalización y Ruta</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-
+    <title>Geolocalización con Ruta y Cronómetro</title>
     <style>
-        #map { height: 100vh; }
+        #map {
+            background-image: url('./asdasd.jpg'); /* Imagen de fondo */
+            height: 400px;
+            width: 100%;
+            background-size: cover;
+            position: relative;
+        }
+        .marker {
+            width: 10px;
+            height: 10px;
+            background-color: red;
+            border-radius: 50%;
+            position: absolute;
+        }
+        #controls {
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
     <div id="map"></div>
+    <div id="controls">
+        <button id="startBtn">Iniciar</button>
+        <p>Tiempo: <span id="timer">0</span> segundos</p>
+        <p>Distancia: <span id="distance">0</span> metros</p>
+    </div>
     <script src="app.js"></script>
 </body>
 </html>
