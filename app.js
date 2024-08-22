@@ -50,16 +50,17 @@ function startTracking() {
         const latLng = [latitude, longitude];
         positions.push(latLng);
 
-        if (positions.length > 1) {
+        if (positions.length === 1) {
+            // Zoom in to the first position
+            map.setView(latLng, 50); // Adjust zoom level as needed
+        } else {
             const polyline = L.polyline(positions, { color: 'blue' }).addTo(map);
+        }
 
-            if (lastPosition) {
-                const dist = calculateDistance(lastPosition.lat, lastPosition.lng, latitude, longitude);
-                distance += dist;
-                distanceElement.textContent = Math.round(distance);
-            }
-
-            map.setView(latLng);
+        if (lastPosition) {
+            const dist = calculateDistance(lastPosition.lat, lastPosition.lng, latitude, longitude);
+            distance += dist;
+            distanceElement.textContent = Math.round(distance);
         }
 
         lastPosition = { lat: latitude, lng: longitude };
